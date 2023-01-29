@@ -20,7 +20,7 @@ before_install:
   - gcloud config set compute/zone us-central1
   - gcloud container clusters get-credentials udemy-multi-cluster
   # Login to Docker
-  - ech0 "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   # Build test images
   - docker build -t danielvdm/client-test -f ./client/Dockerfile.dev ./client
   - docker build -t danielvdm/api-test -f ./api/Dockerfile.dev ./api
