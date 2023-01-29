@@ -2,9 +2,36 @@ sudo: required
 services:
   - docker
 
+env:
+  global:
+    - GIT_SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+
 before_install:
+  # Decrypt google service account
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  # Download google cloud cli
   - curl https://sdk.cloud.google.com | bash > /dev/null;
   - source $HOME/google-cloud-sdk/path.bash.inc
+  # Setup google cloud cli
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
-  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  - gcloud config set project udemy-k8s-375810
+  - gcloud config set compute/zone us-central1
+  - gcloud container clusters get-credentials udemy-multi-cluster
+  # Login to Docker
+  - ech0 "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  # Build test images
+  - docker build -t danielvdm/client-test -f ./client/Dockerfile.dev ./client
+  - docker build -t danielvdm/api-test -f ./api/Dockerfile.dev ./api
+
+script:
+  # Run test images
+  - docker run -e CI=true danielvdm/client-test npm run test
+  - docker run -e CI=true danielvdm/api-test npm run test
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
