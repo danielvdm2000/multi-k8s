@@ -17,7 +17,7 @@ before_install:
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
   - gcloud config set project udemy-k8s-376301
-  - gcloud config set compute/zone us-central1
+  - gcloud config set compute/region us-central1
   - gcloud container clusters get-credentials autopilot-cluster-1
   # Login to Docker
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin

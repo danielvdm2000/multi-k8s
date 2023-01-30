@@ -18,7 +18,6 @@ const FibPage = () => {
     }
 
     async function handleSubmit(event) {
-        console.log('hej')
         event.preventDefault()
 
         await fetch('/api/values', {
@@ -37,6 +36,15 @@ const FibPage = () => {
     useEffect(() => {
         fetchValues();
         fetchIndexes();
+    }, [])
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            fetchValues();
+            fetchIndexes();
+        }, 1000);
+
+        return () => window.clearInterval(interval);
     }, [])
 
     return (
